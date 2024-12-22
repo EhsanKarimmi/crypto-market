@@ -1,6 +1,6 @@
 import React from 'react'
 
-function Loader() {
+function Spinner() {
     return (
         <div className="flex-col gap-2 w-full flex items-center justify-center">
             <div
@@ -11,8 +11,7 @@ function Loader() {
                 ></div>
             </div>
         </div>
-
     )
 }
 
-export default Loader
+export default Spinner

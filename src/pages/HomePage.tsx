@@ -1,96 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import Loader from '../components/Loader/Loader';
+import useCryptos from '../hooks/useCryptos';
+import useWebSocket from '../hooks/useWebSocket';
 
 
-
-interface Crypto {
-    id: string;
-    name: string;
-    symbol: string;
-    priceUsd: string;
-    changePercent24Hr: string;
-}
 function HomePage() {
-    // state
-    const [cryptos, setCryptos] = useState<Crypto[]>([]);
-    const [prices, setPrices] = useState<{ [key: string]: { price: number; changePercent24Hr: number } }>({});
-    // pagination
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-
-
-    const loaderRef = useRef(null);
+    const { cryptos, loadMore, hasMore } = useCryptos();
+    const { prices } = useWebSocket(cryptos)
     const navigate = useNavigate();
-
-    // get cryptos data
-    const getCryptos = useCallback(async (page: number) => {
-        const limit = 5;
-        const offset = (page - 1) * limit;
-        const response = await fetch(`https://api.coincap.io/v2/assets?limit=${limit}&offset=${offset}`)
-        const data = await response.json()
-        if (data?.data?.length === 0) {
-            setHasMore(false);
-        } else {
-            setCryptos((prev) => [...prev, ...data.data]);
-        }
-    }, [])
-
-
-    // get real time crypto prices
-    useEffect(() => {
-        if (cryptos.length === 0) return;
-
-        const ws = new WebSocket(
-            `wss://ws.coincap.io/prices?assets=${cryptos.map((crypto) => crypto.id).join(",")}`
-        );
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-
-            setPrices((prevPrices) => {
-                const updatedPrices = { ...prevPrices };
-
-                Object.keys(data).forEach((id) => {
-                    const currentPrice = parseFloat(data[id]);
-                    const oldPrice = prevPrices[id]?.price.toString() || cryptos.find((crypto) => crypto.id === id)?.priceUsd;
-
-                    updatedPrices[id] = {
-                        price: currentPrice,
-                        changePercent24Hr: oldPrice
-                            ? ((currentPrice - parseFloat(oldPrice)) / parseFloat(oldPrice)) * 100
-                            : 0,
-                    };
-                });
-
-                return updatedPrices;
-            });
-        };
-
-        return () => ws.close();
-    }, [cryptos]);
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && hasMore) {
-                    setPage((prev) => prev + 1);
-                }
-            },
-            { threshold: 1.0 }
-        );
-
-        if (loaderRef.current) observer.observe(loaderRef.current);
-
-        return () => {
-            if (loaderRef.current) observer.unobserve(loaderRef.current);
-        };
-    }, [hasMore]);
-
-    useEffect(() => {
-        getCryptos(page);
-    }, [page, getCryptos]);
-
-
     return (
         <div className='w-full'>
             {/* page title */}
@@ -137,7 +53,15 @@ function HomePage() {
 
                 </tbody>
             </table>
-            {hasMore && <div ref={loaderRef} className='w-full flex justify-center items-center py-4'><Loader /></div>}
+            {hasMore &&
+                <div
+
+                    className="w-full flex justify-center items-center py-6"
+                >
+                    <button role='button'
+                        onClick={loadMore}
+                        className='bg-zinc-900 text-white px-3 py-2 rounded-md font-light text-sm '>Load More</button>
+                </div>}
         </div>
     )
 }
