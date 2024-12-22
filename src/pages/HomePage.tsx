@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
+import Loader from '../components/Loader/Loader';
 
 
 
@@ -136,7 +137,7 @@ function HomePage() {
 
                 </tbody>
             </table>
-            {hasMore && <div ref={loaderRef} className='w-full flex justify-center items-center'>Loading more...</div>}
+            {hasMore && <div ref={loaderRef} className='w-full flex justify-center items-center py-4'><Loader /></div>}
         </div>
     )
 }
