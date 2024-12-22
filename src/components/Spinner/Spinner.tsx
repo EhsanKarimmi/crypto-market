@@ -1,5 +1,3 @@
-import React from 'react'
-
 function Spinner() {
     return (
         <div className="flex-col gap-2 w-full flex items-center justify-center">

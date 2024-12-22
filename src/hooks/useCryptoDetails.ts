@@ -14,6 +14,7 @@ interface HistoricalPrice {
 }
 
 const useCryptoDetails = (id: string | undefined) => {
+    // state
     const [crypto, setCrypto] = useState<Crypto | null>(null);
     const [prices, setPrices] = useState<{ price: number; changePercent24Hr: number } | null>(null);
     const [historicalPrices, setHistoricalPrices] = useState<HistoricalPrice[]>([]);
@@ -21,21 +22,23 @@ const useCryptoDetails = (id: string | undefined) => {
 
     useEffect(() => {
         if (!id) return;
-
-        const fetchCrypto = async () => {
+        // else
+        const getCrypto = async () => {
             setIsLoading(true);
             try {
+                // fetch and save crypto details
                 const response = await fetch(`https://api.coincap.io/v2/assets/${id}`);
                 const data = await response.json();
                 setCrypto(data.data);
-
+                // get price history
                 const historyResponse = await fetch(
                     `https://api.coincap.io/v2/assets/${id}/history?interval=d1`
                 );
                 const historyData = await historyResponse.json();
                 setHistoricalPrices(historyData.data);
-
+                // web socket connection
                 const ws = new WebSocket(`wss://ws.coincap.io/prices?assets=${id}`);
+
                 ws.onmessage = (event) => {
                     const data = JSON.parse(event.data);
                     const currentPrice = parseFloat(data[id]);
@@ -52,16 +55,15 @@ const useCryptoDetails = (id: string | undefined) => {
                         });
                     }
                 };
-
+                // close web socket connection
                 return () => ws.close();
             } catch (error) {
-                console.error("Error fetching crypto details:", error);
+                console.error("Error:", error);
             } finally {
                 setIsLoading(false);
             }
         };
-
-        fetchCrypto();
+        getCrypto();
     }, [id]);
 
     return { crypto, prices, historicalPrices, isLoading };

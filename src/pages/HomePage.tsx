@@ -4,8 +4,11 @@ import useWebSocket from '../hooks/useWebSocket';
 
 
 function HomePage() {
+    // get cryptos data
     const { cryptos, loadMore, hasMore } = useCryptos();
+    // get real time cryptos prices
     const { prices } = useWebSocket(cryptos)
+    // navigate
     const navigate = useNavigate();
     return (
         <div className='w-full'>
@@ -54,10 +57,7 @@ function HomePage() {
                 </tbody>
             </table>
             {hasMore &&
-                <div
-
-                    className="w-full flex justify-center items-center py-6"
-                >
+                <div className="w-full flex justify-center items-center py-6">
                     <button role='button'
                         onClick={loadMore}
                         className='bg-zinc-900 text-white px-3 py-2 rounded-md font-light text-sm '>Load More</button>

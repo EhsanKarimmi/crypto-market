@@ -8,19 +8,18 @@ interface HistoricalPrice {
     time: number;
     priceUsd: number;
 }
-
 interface ChartProps {
     historicalPrices: HistoricalPrice[];
 }
-
 const Chart: React.FC<ChartProps> = ({ historicalPrices }) => {
+    // chart data
     const data = {
         labels: historicalPrices.map((point) =>
             new Date(point.time).toLocaleDateString()
         ),
         datasets: [
             {
-                label: "Price (USD)",
+                label: "Price(USD)",
                 data: historicalPrices.map((point) => point.priceUsd),
                 borderColor: "rgba(75, 192, 192, 1)",
                 backgroundColor: "rgba(75, 192, 192, 0.2)",
@@ -30,8 +29,11 @@ const Chart: React.FC<ChartProps> = ({ historicalPrices }) => {
     };
 
     return (
-        <div className="w-full h-64">
-            <Line data={data} />
+        <div className="w-full h-96">
+            <Line data={data} options={{
+                responsive: true,
+                maintainAspectRatio: false
+            }} />
         </div>
     );
 };

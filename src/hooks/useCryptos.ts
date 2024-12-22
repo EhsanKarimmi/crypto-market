@@ -9,10 +9,12 @@ interface Crypto {
 }
 
 const useCryptos = () => {
+    // state
     const [cryptos, setCryptos] = useState<Crypto[]>([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
+    // get cryptos data
     const getCryptos = useCallback(async (page: number) => {
         const limit = 10;
         const offset = (page - 1) * limit;
@@ -33,10 +35,12 @@ const useCryptos = () => {
         }
     }, []);
 
+    // get cryptos useEffect
     useEffect(() => {
         getCryptos(page);
     }, [page, getCryptos]);
 
+    // for load more data with increase page
     const loadMore = () => {
         if (hasMore) setPage((prev) => prev + 1);
     };
